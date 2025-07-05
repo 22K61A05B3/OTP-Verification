@@ -5,6 +5,9 @@ const app=express();
 app.use(express.json());
 app.use(cors());
 let savedOTPs={};
+app.get('/', (req, res) => {
+    res.send('✅ OTP Backend is Running on Render!');
+  });  
 app.post("/sendOTP",(req,res)=>{
     let email=req.body.email,name=req.body.name,otp="",i;
     for(i=0;i<4;i++)
