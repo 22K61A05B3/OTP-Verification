@@ -36,6 +36,10 @@
     padding-bottom:10px;
     justify-items: center;
   }
+  p.para{
+    display:flex;
+    flex-wrap: wrap;
+  }
   div.child2 div{
     display:flex;
     margin-top:15px;
