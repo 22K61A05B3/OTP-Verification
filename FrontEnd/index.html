@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>OTP Verification</title>
+</head>
+<body>
+    <div class="main">
+        <div class="child1">
+            <h1>OTP VERIFICATION</h1>
+            <div class="inputs">
+                <div><input type="text" required  id="name" placeholder="Enter your name..."></div>
+                <div style="display:flex;gap:10px"><input type="email" required id="email" placeholder="Enter your email.."><button onclick="sendOTP()">GET OTP</button></div>
+            </div>
+        </div>
+        <div class="child2">
+            <p>An otp has been sent to <span></span></p>
+            <p>Please enter OTP to verify</p>
+            <div>
+                <input type="text" required maxlength="1" class="num num1">
+                <input type="text" required maxlength="1" class="num num2">
+                <input type="text" required maxlength="1" class="num num3">
+                <input type="text" required maxlength="1" class="num num4">
+            </div>
+        </div>
+        <p class="invalid">Invalid OTP.</p>
+        <p class="valid">OTP verified successfully.</p>
+    </div>
+    <script>
+        let inputs=document.querySelectorAll(".num"),email,otp,name;
+        async function sendOTP()
+        {
+            email=document.getElementById("email").value.trim();
+            name=document.getElementById("name").value.trim();
+            if(email===""||name==="")
+            {
+                alert("Please enter the required fields..");
+                return ;
+            }
+            try{
+                let response=await fetch("http://localhost:6500/sendOTP",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        "name":`${name}`,
+                        "email":`${email}`
+                    })
+                });
+                if(response.ok)
+                {
+                    alert("OTP sent successfully");
+                    document.getElementById("email").value=" ";
+                    document.getElementById("name").value=" ";
+                    document.getElementsByTagName("span")[0].textContent=`***${email.slice(5)}`;
+                    document.getElementsByClassName("child2")[0].style.display="block";
+                }
+                else
+                {
+                    alert("Failed to send OTP");
+                }
+            }
+            catch(error){
+                alert("Server error : "+error);
+            }
+        }
+        inputs.forEach((input)=>{
+            input.addEventListener("keyup",moveNext);
+        });
+        function moveNext(event) {
+            let current = event.target;
+            let index = current.classList[1].slice(-1);
+            if (event.keyCode == 8 && index > 1) {
+                current.previousElementSibling.focus()
+            }
+            else if (index < 4) {
+                current.nextElementSibling.focus()
+            }
+            otp="";
+            for(num of inputs)
+            {
+                otp+=num.value;
+            }
+            if(otp.length===4)
+            {
+                verify();
+            }
+        }
+        async function verify(){
+            try{
+                let response=await fetch("http://localhost:6500/verify",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        email:`${email}`,
+                        otp:`${otp}`
+                    })
+                });
+                if(response.ok)
+                {
+                    alert("Valid OTP");
+                    document.getElementsByClassName("invalid")[0].style.display="none";
+                    document.getElementsByClassName("valid")[0].style.display="block";
+                }
+                else
+                {
+                    alert("Invalid OTP");
+                    document.getElementsByClassName("valid")[0].style.display="none";
+                    document.getElementsByClassName("invalid")[0].style.display="block";
+                }
+            }
+            catch(error)
+            {
+                alert("Error : "+error);
+            }
+        }
+    </script>
+</body>
+</html>
